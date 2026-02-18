@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>КОНУРА ДАНИ - Мини-игры</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* Анимация загрузки КОНУРА ДАНИ */
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeOut 1s ease-in-out 2.5s forwards;
+        }
+
+        .splash-content {
+            text-align: center;
+            transform: scale(0);
+            animation: scaleIn 0.5s ease-out 0.2s forwards;
+        }
+
+        .splash-title {
+            font-size: 4rem;
+            font-weight: 900;
+            color: white;
+            text-shadow: 3px 3px 0 rgba(0,0,0,0.2);
+            letter-spacing: 5px;
+            margin-bottom: 20px;
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        .splash-subtitle {
+            font-size: 1.5rem;
+            color: rgba(255,255,255,0.9);
+            letter-spacing: 3px;
+            opacity: 0;
+            animation: fadeIn 0.5s ease-out 1s forwards;
+        }
+
+        .splash-loader {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255,255,255,0.3);
+            border-top: 5px solid white;
+            border-radius: 50%;
+            margin: 30px auto 0;
+            animation: spin 1s linear infinite;
+            opacity: 0;
+            animation: spin 1s linear infinite, fadeIn 0.5s ease-out 1.5s forwards;
+        }
+
+        /* Основной контейнер */
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            opacity: 0;
+            animation: fadeIn 1s ease-out 2.8s forwards;
+        }
+
+        /* Заголовок */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5rem;
+            text-align: center;
+        }
+
+        .header h1 span {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Статистика */
+        .stats-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        /* Игры */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .game-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .game-card:hover::before {
+            left: 100%;
+        }
+
+        .game-emoji {
+            font-size: 4rem;
+            margin-bottom: 15px;
+        }
+
+        .game-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .game-description {
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .game-stats {
+            background: #f5f5f5;
+            border-radius: 10px;
+            padding: 10px;
+            font-size: 0.9rem;
+        }
+
+        .play-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: transform 0.3s;
+            margin-top: 15px;
+        }
+
+        .play-button:hover {
+            transform: scale(1.05);
+        }
+
+        /* Таблица лидеров */
+        .leaders-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        .leaders-title {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .leaders-list {
+            list-style: none;
+        }
+
+        .leader-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            transition: background 0.3s;
+        }
+
+        .leader-item:hover {
+            background: #f5f5f5;
+        }
+
+        .leader-rank {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .leader-info {
+            flex: 1;
+        }
+
+        .leader-name {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .leader-stats {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .leader-wins {
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        /* Модальное окно игры */
+        .game-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 30px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #666;
+            transition: color 0.3s;
+        }
+
+        .close-modal:hover {
+            color: #333;
+        }
+
+        .game-area {
+            text-align: center;
+        }
+
+        /* Стили для игр */
+        .guess-input {
+            width: 100px;
+            padding: 10px;
+            font-size: 1.2rem;
+            text-align: center;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            margin: 10px;
+        }
+
+        .rps-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .rps-button {
+            font-size: 3rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 15px;
+            transition: transform 0.3s, background 0.3s;
+        }
+
+        .rps-button:hover {
+            transform: scale(1.1);
+            background: #f0f0f0;
+        }
+
+        .dice-area {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .dice {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 15px;
+            animation: roll 0.5s ease-out;
+        }
+
+        .result-message {
+            font-size: 1.3rem;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+
+        .win {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .lose {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Анимации */
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes scaleIn {
+            to {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes glow {
+            0%, 100% {
+                text-shadow: 3px 3px 0 rgba(0,0,0,0.2), 0 0 20px rgba(255,255,255,0.5);
+            }
+            50% {
+                text-shadow: 3px 3px 0 rgba(0,0,0,0.2), 0 0 40px rgba(255,255,255,0.8);
+            }
+        }
+
+        @keyframes roll {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .splash-title {
+                font-size: 2.5rem;
+            }
+            
+            .games-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-panel {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Анимация загрузки КОНУРА ДАНИ -->
+    <div class="splash-screen" id="splash">
+        <div class="splash-content">
+            <div class="splash-title">КОНУРА ДАНИ</div>
+            <div class="splash-subtitle">GAMES</div>
+            <div class="splash-loader"></div>
+        </div>
+    </div>
+
+    <!-- Основной контейнер -->
+    <div class="container" id="mainContainer">
+        <!-- Заголовок -->
+        <div class="header">
+            <h1>🎮 <span>КОНУРА ДАНИ</span> 🎮</h1>
+        </div>
+
+        <!-- Статистика -->
+        <div class="stats-panel" id="statsPanel">
+            <div class="stat-card">
+                <div class="stat-value" id="totalGames">0</div>
+                <div class="stat-label">Всего игр</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalWins">0</div>
+                <div class="stat-label">Побед</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="winRate">0%</div>
+                <div class="stat-label">Винрейт</div>
+            </div>
+        </div>
+
+        <!-- Игры -->
+        <div class="games-grid">
+            <!-- Угадай число -->
+            <div class="game-card" onclick="openGame('guess')">
+                <div class="game-emoji">🎯</div>
+                <div class="game-title">Угадай число</div>
+                <div class="game-description">Угадай число от 1 до 100</div>
+                <div class="game-stats" id="guessStats">Игр: 0 | Побед: 0 | Винрейт: 0%</div>
+                <button class="play-button">Играть</button>
+            </div>
+
+            <!-- Камень-ножницы-бумага -->
+            <div class="game-card" onclick="openGame('rps')">
+                <div class="game-emoji">✂️</div>
+                <div class="game-title">Камень-ножницы-бумага</div>
+                <div class="game-description">Сразись с компьютером</div>
+                <div class="game-stats" id="rpsStats">Игр: 0 | Побед: 0 | Винрейт: 0%</div>
+                <button class="play-button">Играть</button>
+            </div>
+
+            <!-- Кто больше кинет кости -->
+            <div class="game-card" onclick="openGame('dice')">
+                <div class="game-emoji">🎲</div>
+                <div class="game-title">Кто больше кинет кости</div>
+                <div class="game-description">Кости против компьютера</div>
+                <div class="game-stats" id="diceStats">Игр: 0 | Побед: 0 | Среднее: 0</div>
+                <button class="play-button">Играть</button>
+            </div>
+        </div>
+
+        <!-- Таблица лидеров -->
+        <div class="leaders-panel">
+            <div class="leaders-title">🏆 ТОП-5 ИГРОКОВ 🏆</div>
+            <div class="leaders-list" id="leadersList">
+                <div style="text-align: center; color: #666;">Загрузка...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно игры -->
+    <div class="game-modal" id="gameModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeGameModal()">&times;</span>
+            <div id="gameContent" class="game-area"></div>
+        </div>
+    </div>
+
+    <script>
+        // Получаем user_id из URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const USER_ID = urlParams.get('user_id');
+        
+        // Статистика игрока
+        let userStats = {
+            total_games: 0,
+            total_wins: 0
+        };
+        
+        let gameStats = [];
+        let topPlayers = [];
+
+        // Загружаем статистику при запуске
+        window.onload = function() {
+            loadStats();
+            
+            // Автоматическое обновление каждые 10 минут
+            setInterval(loadStats, 600000);
+        };
+
+        // Загрузка статистики
+        async function loadStats() {
+            try {
+                // Отправляем запрос в бот для получения статистики
+                if (window.Telegram && Telegram.WebApp) {
+                    Telegram.WebApp.sendData(JSON.stringify({
+                        action: 'get_stats'
+                    }));
+                }
+                
+                // Здесь можно добавить запрос к вашему API
+                // Для примера используем локальные данные
+                updateStatsDisplay();
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        // Обновление отображения статистики
+        function updateStatsDisplay() {
+            // Общая статистика
+            document.getElementById('totalGames').textContent = userStats.total_games || 0;
+            document.getElementById('totalWins').textContent = userStats.total_wins || 0;
+            
+            const winRate = userStats.total_games > 0 
+                ? ((userStats.total_wins / userStats.total_games) * 100).toFixed(1)
+                : 0;
+            document.getElementById('winRate').textContent = winRate + '%';
+
+            // Статистика по играм
+            gameStats.forEach(stat => {
+                const winRateGame = stat.games > 0 
+                    ? ((stat.wins / stat.games) * 100).toFixed(1)
+                    : 0;
+                
+                if (stat.game_type === 'guess') {
+                    document.getElementById('guessStats').textContent = 
+                        `Игр: ${stat.games} | Побед: ${stat.wins} | Винрейт: ${winRateGame}%`;
+                } else if (stat.game_type === 'rps') {
+                    document.getElementById('rpsStats').textContent = 
+                        `Игр: ${stat.games} | Побед: ${stat.wins} | Винрейт: ${winRateGame}%`;
+                } else if (stat.game_type === 'dice') {
+                    const avgScore = stat.avg_score ? stat.avg_score.toFixed(1) : 0;
+                    document.getElementById('diceStats').textContent = 
+                        `Игр: ${stat.games} | Побед: ${stat.wins} | Среднее: ${avgScore}`;
+                }
+            });
+
+            // Обновление таблицы лидеров
+            updateLeadersDisplay();
+        }
+
+        // Обновление таблицы лидеров
+        function updateLeadersDisplay() {
+            const leadersList = document.getElementById('leadersList');
+            
+            if (topPlayers.length === 0) {
+                leadersList.innerHTML = '<div style="text-align: center; color: #666;">Пока нет игроков в топе</div>';
+                return;
+            }
+
+            leadersList.innerHTML = '';
+            topPlayers.forEach((player, index) => {
+                const winRate = player.total_games > 0 
+                    ? ((player.total_wins / player.total_games) * 100).toFixed(1)
+                    : 0;
+                
+                const leaderItem = document.createElement('div');
+                leaderItem.className = 'leader-item';
+                leaderItem.innerHTML = `
+                    <div class="leader-rank">${index + 1}</div>
+                    <div class="leader-info">
+                        <div class="leader-name">${player.first_name || player.username || 'Игрок'}</div>
+                        <div class="leader-stats">
+                            🏆 Побед: <span class="leader-wins">${player.total_wins}</span> | 
+                            🎮 Игр: ${player.total_games} | 
+                            📊 ${winRate}%
+                        </div>
+                    </div>
+                `;
+                leadersList.appendChild(leaderItem);
+            });
+        }
+
+        // Открытие игры
+        function openGame(gameType) {
+            const modal = document.getElementById('gameModal');
+            const gameContent = document.getElementById('gameContent');
+            
+            switch(gameType) {
+                case 'guess':
+                    gameContent.innerHTML = getGuessGameHTML();
+                    break;
+                case 'rps':
+                    gameContent.innerHTML = getRPSGameHTML();
+                    break;
+                case 'dice':
+                    gameContent.innerHTML = getDiceGameHTML();
+                    break;
+            }
+            
+            modal.style.display = 'flex';
+        }
+
+        // Закрытие модального окна
+        function closeGameModal() {
+            document.getElementById('gameModal').style.display = 'none';
+        }
+
+        // HTML для игры "Угадай число"
+        function getGuessGameHTML() {
+            return `
+                <h2>🎯 Угадай число</h2>
+                <p>Я загадал число от 1 до 100</p>
+                <input type="number" id="guessInput" class="guess-input" min="1" max="100">
+                <button class="play-button" onclick="playGuessGame()">Угадать</button>
+                <div id="guessResult"></div>
+            `;
+        }
+
+        // Игра "Угадай число"
+        function playGuessGame() {
+            const guess = parseInt(document.getElementById('guessInput').value);
+            const secretNumber = Math.floor(Math.random() * 100) + 1;
+            const resultDiv = document.getElementById('guessResult');
+            
+            const won = guess === secretNumber;
+            const message = won 
+                ? `🎉 Поздравляю! Ты угадал число ${secretNumber}!` 
+                : `😢 Не угадал. Я загадал ${secretNumber}, а ты назвал ${guess}.`;
+            
+            resultDiv.innerHTML = `<div class="result-message ${won ? 'win' : 'lose'}">${message}</div>`;
+            
+            // Сохраняем результат
+            saveGameResult('guess', won, 0);
+        }
+
+        // HTML для игры "Камень-ножницы-бумага"
+        function getRPSGameHTML() {
+            return `
+                <h2>✂️ Камень-ножницы-бумага</h2>
+                <div class="rps-buttons">
+                    <button class="rps-button" onclick="playRPSGame('rock')">🪨</button>
+                    <button class="rps-button" onclick="playRPSGame('paper')">📄</button>
+                    <button class="rps-button" onclick="playRPSGame('scissors')">✂️</button>
+                </div>
+                <div id="rpsResult"></div>
+            `;
+        }
+
+        // Игра "Камень-ножницы-бумага"
+        function playRPSGame(playerChoice) {
+            const choices = ['rock', 'paper', 'scissors'];
+            const computerChoice = choices[Math.floor(Math.random() * 3)];
+            
+            const emojis = {
+                'rock': '🪨',
+                'paper': '📄',
+                'scissors': '✂️'
+            };
+            
+            let result, won;
+            
+            if (playerChoice === computerChoice) {
+                result = 'Ничья!';
+                won = false;
+            } else if (
+                (playerChoice === 'rock' && computerChoice === 'scissors') ||
+                (playerChoice === 'paper' && computerChoice === 'rock') ||
+                (playerChoice === 'scissors' && computerChoice === 'paper')
+            ) {
+                result = '🎉 Ты победил!';
+                won = true;
+            } else {
+                result = '😢 Компьютер победил!';
+                won = false;
+            }
+            
+            const resultDiv = document.getElementById('rpsResult');
+            resultDiv.innerHTML = `
+                <div class="result-message ${won ? 'win' : 'lose'}">
+                    Ты: ${emojis[playerChoice]}<br>
+                    Компьютер: ${emojis[computerChoice]}<br>
+                    ${result}
+                </div>
+            `;
+            
+            // Сохраняем результат
+            saveGameResult('rps', won, 0);
+        }
+
+        // HTML для игры "Кто больше кинет кости"
+        function getDiceGameHTML() {
+            return `
+                <h2>🎲 Кто больше кинет кости</h2>
+                <button class="play-button" onclick="playDiceGame()">Бросить кости</button>
+                <div id="diceResult"></div>
+            `;
+        }
+
+        // Игра "Кто больше кинет кости"
+        function playDiceGame() {
+            const playerDice = Math.floor(Math.random() * 6) + 1;
+            const computerDice = Math.floor(Math.random() * 6) + 1;
+            
+            const won = playerDice > computerDice;
+            
+            const resultDiv = document.getElementById('diceResult');
+            resultDiv.innerHTML = `
+                <div class="dice-area">
+                    <div class="dice">${playerDice}</div>
+                    <div class="dice">${computerDice}</div>
+                </div>
+                <div class="result-message ${won ? 'win' : 'lose'}">
+                    ${won ? '🎉 Ты победил!' : '😢 Компьютер победил!'}
+                    ${playerDice === computerDice ? ' (Ничья)' : ''}
+                </div>
+            `;
+            
+            // Сохраняем результат (ничья считается поражением для простоты)
+            saveGameResult('dice', won, playerDice);
+        }
+
+        // Сохранение результата игры
+        function saveGameResult(gameType, won, score) {
+            if (window.Telegram && Telegram.WebApp) {
+                Telegram.WebApp.sendData(JSON.stringify({
+                    action: 'save_game',
+                    game_type: gameType,
+                    won: won,
+                    score: score
+                }));
+            }
+            
+            // Обновляем локальную статистику
+            userStats.total_games++;
+            if (won) userStats.total_wins++;
+            
+            // Обновляем статистику по игре
+            const gameStat = gameStats.find(s => s.game_type === gameType);
+            if (gameStat) {
+                gameStat.games++;
+                if (won) gameStat.wins++;
+                if (gameType === 'dice') {
+                    gameStat.avg_score = ((gameStat.avg_score * (gameStat.games - 1)) + score) / gameStat.games;
+                }
+            } else {
+                gameStats.push({
+                    game_type: gameType,
+                    games: 1,
+                    wins: won ? 1 : 0,
+                    avg_score: gameType === 'dice' ? score : 0
+                });
+            }
+            
+            updateStatsDisplay();
+        }
+
+        // Обработка данных от бота
+        if (window.Telegram && Telegram.WebApp) {
+            Telegram.WebApp.ready();
+            
+            Telegram.WebApp.onEvent('web_app_data', (data) => {
+                try {
+                    const response = JSON.parse(data);
+                    if (response.user_stats) {
+                        userStats = response.user_stats;
+                    }
+                    if (response.game_stats) {
+                        gameStats = response.game_stats;
+                    }
+                    if (response.top_players) {
+                        topPlayers = response.top_players;
+                    }
+                    updateStatsDisplay();
+                } catch (error) {
+                    console.error('Error parsing data from bot:', error);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
